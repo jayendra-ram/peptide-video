@@ -28,3 +28,7 @@ labeling:
   halo_strength: 0.5
   halo_color: "#ffffff"
   drop_shadow: true
+manim:
+  font: "Source Sans Pro"
+  text_scale: 0.4
+  atom_radius_scale: 1.0

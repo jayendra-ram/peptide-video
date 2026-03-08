@@ -1,15 +1,31 @@
 """Scene 7: amide resonance and planarity.
 
-Pulsing orbital-like glow on the C-N bond shows resonance character.
-Camera orbits to reveal planarity.
+Two resonance canonical forms side by side, a resonance hybrid below,
+and annotations showing partial double-bond character and restricted rotation.
 """
 
 from __future__ import annotations
 
-import math
 import sys
 from pathlib import Path
-from typing import Any, Dict
+
+from manim import (
+    Circle,
+    Cross,
+    DOWN,
+    FadeIn,
+    FadeOut,
+    LEFT,
+    Line,
+    MathTex,
+    RIGHT,
+    Text,
+    UP,
+    VGroup,
+    WHITE,
+    Write,
+    np,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -17,132 +33,143 @@ if str(ROOT) not in sys.path:
 
 SCENE_ID = "scene_07_resonance"
 
+from src.manim.scene_base import PeptideSceneBase
+from src.manim.molecule_mobject import MoleculeMobject
+from src.manim.resonance_mobject import ResonancePair
+from src.chemistry.molecules import AMIDE_PRODUCT, MolGeom
 
-def build(scene_ctx: Dict[str, Any]) -> None:
-    style = scene_ctx["style"]
-    preset = scene_ctx["preset"]
-    fps = scene_ctx.get("fps", 30)
-    duration = scene_ctx.get("duration_seconds", 22)
 
-    from src.core.blender_scene import (
-        _set_bezier_easing,
-        add_orbital_lobe,
-        add_text_overlay,
-        hex_to_linear_rgb,
-        setup_camera,
-        setup_lighting,
-        setup_scene,
-    )
-    from src.chemistry.molecules import AMIDE_PRODUCT, draw_molecule
+def _make_resonance_b() -> MolGeom:
+    """Create resonance structure B: C-O single bond, C=N double bond."""
+    modified_bonds = []
+    for label_a, label_b, order in AMIDE_PRODUCT.bonds:
+        if label_a == "C1" and label_b == "O1":
+            modified_bonds.append((label_a, label_b, 1.0))
+        elif label_a == "C1" and label_b == "N2":
+            modified_bonds.append((label_a, label_b, 2.0))
+        else:
+            modified_bonds.append((label_a, label_b, order))
+    return MolGeom(atoms=list(AMIDE_PRODUCT.atoms), bonds=modified_bonds)
 
-    setup_scene(preset, style, fps=fps, duration_seconds=duration)
-    setup_lighting()
 
-    import bpy
+class ResonanceScene(PeptideSceneBase):
+    """11-second scene: resonance structures, hybrid, and planarity annotations."""
 
-    total_frames = int(fps * duration)
+    def construct(self) -> None:
+        # Prepare resonance structures
+        resonance_a = AMIDE_PRODUCT  # C=O (1.5), C-N (1.4) canonical form
+        resonance_b = _make_resonance_b()  # C-O (1.0), C=N (2.0) canonical form
 
-    # Draw amide product
-    atoms = draw_molecule(AMIDE_PRODUCT, style, label_prefix="S7_")
+        # ── Step 1: Write title (0.8s) ─────────────────────────────────────
+        title = Text(
+            "Amide Resonance",
+            font_size=42,
+            color=WHITE,
+            weight="BOLD",
+        ).to_edge(UP, buff=0.4)
+        self.play(Write(title), run_time=0.8)
 
-    c1_pos = atoms["C1"].location
-    n2_pos = atoms["N2"].location
-    o1_pos = atoms["O1"].location
+        # ── Step 2: FadeIn resonance structure A (left) (1s) ───────────────
+        resonance_pair = ResonancePair(
+            geom_a=resonance_a,
+            geom_b=resonance_b,
+            atom_colors=self.ATOM_COLORS,
+            label_a="C=O, C\u2013N",
+            label_b="C\u2013O\u207b, C=N\u207a",
+            charges_b={"N2": "+", "O1": "-"},
+            separation=5.5,
+        )
+        resonance_pair.shift(UP * 0.5)
 
-    # --- Resonance glow: large pulsing lobe between C1 and N2 ---
-    cn_mid = tuple((c1_pos[i] + n2_pos[i]) / 2 for i in range(3))
-    co_mid = tuple((c1_pos[i] + o1_pos[i]) / 2 for i in range(3))
+        # Animate left structure first
+        self.play(FadeIn(resonance_pair.mol_a), run_time=1.0)
 
-    # Donor-side lobe on C-N (purple, pulsing)
-    cn_lobe = add_orbital_lobe(
-        position=cn_mid,
-        role="donor",
-        scale=(0.35, 0.2, 0.25),
-        style=style,
-        name="CN_Resonance_Lobe",
-    )
+        # ── Step 3: Write double-headed arrow (0.5s) ───────────────────────
+        self.play(Write(resonance_pair.arrow), run_time=0.5)
 
-    # Acceptor-side lobe on C=O (orange, counter-pulsing)
-    co_lobe = add_orbital_lobe(
-        position=co_mid,
-        role="acceptor",
-        scale=(0.25, 0.2, 0.2),
-        style=style,
-        name="CO_Resonance_Lobe",
-    )
+        # ── Step 4: FadeIn structure B with formal charges (1s) ────────────
+        # Gather everything in the pair except mol_a and arrow
+        structure_b_parts = VGroup()
+        for sub in resonance_pair.submobjects:
+            if sub is not resonance_pair.mol_a and sub is not resonance_pair.arrow:
+                structure_b_parts.add(sub)
+        self.play(FadeIn(structure_b_parts), run_time=1.0)
 
-    # --- Animate resonance: CN lobe grows as CO lobe shrinks, and vice versa ---
-    cycle_frames = int(fps * 2.0)  # 2-second cycle (faster)
-    num_cycles = int(total_frames / cycle_frames) + 1
+        # ── Step 5: FadeIn hybrid structure below with annotation (2s) ─────
+        hybrid = MoleculeMobject(
+            AMIDE_PRODUCT,
+            atom_colors=self.ATOM_COLORS,
+            atom_radii=self.ATOM_RADII,
+            show_labels=True,
+            scale_factor=0.85,
+            label_font_size=16,
+        )
+        hybrid.shift(DOWN * 2.2)
 
-    for cycle in range(num_cycles):
-        f_a = 1 + cycle * cycle_frames
-        f_b = f_a + cycle_frames // 2
+        hybrid_label = Text(
+            "Resonance Hybrid",
+            font_size=22,
+            color=WHITE,
+        ).next_to(hybrid, DOWN, buff=0.25)
 
-        cn_lobe.scale = (0.4, 0.25, 0.3)
-        cn_lobe.keyframe_insert(data_path="scale", frame=f_a)
-        cn_lobe.scale = (0.15, 0.1, 0.12)
-        cn_lobe.keyframe_insert(data_path="scale", frame=f_b)
+        self.play(
+            FadeIn(hybrid),
+            FadeIn(hybrid_label),
+            run_time=2.0,
+        )
 
-        co_lobe.scale = (0.15, 0.1, 0.12)
-        co_lobe.keyframe_insert(data_path="scale", frame=f_a)
-        co_lobe.scale = (0.35, 0.25, 0.25)
-        co_lobe.keyframe_insert(data_path="scale", frame=f_b)
+        # ── Step 6: Write bond order and planarity annotations (1.5s) ──────
+        bond_order_text = Text(
+            "Bond order C\u2013N \u2248 1.3\u20131.4 (partial double bond)",
+            font_size=20,
+            color=WHITE,
+        ).next_to(hybrid_label, DOWN, buff=0.3)
 
-    # --- Animate N2 flattening to show planarity ---
-    n2_obj = atoms["N2"]
-    orig_n2 = tuple(n2_pos)
-    flat_n2 = (orig_n2[0], orig_n2[1], 0.0)
+        planarity_text = Text(
+            "Restricted rotation \u2192 planar backbone",
+            font_size=20,
+            color=WHITE,
+        ).next_to(bond_order_text, DOWN, buff=0.2)
 
-    n2_obj.location = orig_n2
-    n2_obj.keyframe_insert(data_path="location", frame=1)
-    n2_obj.keyframe_insert(data_path="location", frame=int(total_frames * 0.2))
-    n2_obj.location = flat_n2
-    n2_obj.keyframe_insert(data_path="location", frame=int(total_frames * 0.5))
-    n2_obj.keyframe_insert(data_path="location", frame=total_frames)
+        # Crossed-out rotation symbol on the C-N bond area
+        no_rotation = VGroup()
+        cross_circle = Circle(
+            radius=0.22,
+            color=self.CHARGE_NEG,
+            stroke_width=2.5,
+        )
+        cross_line = Line(
+            cross_circle.get_corner(UP + LEFT) * 0.7 + cross_circle.get_center() * 0.3,
+            cross_circle.get_corner(DOWN + RIGHT) * 0.7 + cross_circle.get_center() * 0.3,
+            color=self.CHARGE_NEG,
+            stroke_width=2.5,
+        )
+        no_rotation.add(cross_circle, cross_line)
+        no_rot_label = Text("\u2717 rotation", font_size=16, color=self.CHARGE_NEG)
+        no_rotation.add(no_rot_label)
+        no_rot_label.next_to(cross_circle, RIGHT, buff=0.1)
+        no_rotation.next_to(planarity_text, RIGHT, buff=0.4)
 
-    # --- Camera: orbit around the molecule to show planarity ---
-    cam = setup_camera((0.3, -5.5, 1.5), (0.3, 0, -0.3), fov_deg=35)
+        self.play(
+            Write(bond_order_text),
+            Write(planarity_text),
+            FadeIn(no_rotation),
+            run_time=1.5,
+        )
 
-    num_keyframes = 8
-    for i in range(num_keyframes + 1):
-        frame = 1 + int(i * total_frames / num_keyframes)
-        angle = i * math.pi * 0.6 / num_keyframes  # ~108° arc
-        radius = 5.5
-        x = 0.3 + radius * math.sin(angle)
-        y = -radius * math.cos(angle)
-        z_dip = -0.8 * math.sin(math.pi * i / num_keyframes)
-        z = 1.5 + z_dip
-        cam.location = (x, y, z)
-        cam.keyframe_insert(data_path="location", frame=frame)
+        # ── Step 7: Wait remaining ─────────────────────────────────────────
+        # Total so far: 0.8 + 1.0 + 0.5 + 1.0 + 2.0 + 1.5 = 6.8s
+        # Need 11s total minus 1s fadeout = 3.2s remaining
+        self.wait(3.2)
 
-    _set_bezier_easing(cam)
-
-    # --- Labels ---
-    label1 = add_text_overlay(
-        "C=O / C-N Resonance", location=(-2.5, 0, 2.2), size=0.16
-    )
-    label1.scale = (0, 0, 0)
-    label1.keyframe_insert(data_path="scale", frame=1)
-    label1.scale = (1, 1, 1)
-    label1.keyframe_insert(data_path="scale", frame=int(fps * 0.5))
-    label1.keyframe_insert(data_path="scale", frame=int(fps * 3))
-    label1.scale = (0, 0, 0)
-    label1.keyframe_insert(data_path="scale", frame=int(fps * 4))
-
-    label2 = add_text_overlay(
-        "Planar Amide Bond", location=(-2.0, 0, -2.0), size=0.14
-    )
-    label2.scale = (0, 0, 0)
-    label2.keyframe_insert(data_path="scale", frame=int(total_frames * 0.4))
-    label2.scale = (1, 1, 1)
-    label2.keyframe_insert(data_path="scale", frame=int(total_frames * 0.45))
-    label2.keyframe_insert(data_path="scale", frame=int(total_frames * 0.75))
-    label2.scale = (0, 0, 0)
-    label2.keyframe_insert(data_path="scale", frame=int(total_frames * 0.8))
-
-    # Molecule description
-    add_text_overlay(
-        "Amide product: Gly-CO-NH-Gly (partial C=N double bond)",
-        location=(-3.5, 0, -2.8), size=0.09,
-    )
+        # ── Step 8: FadeOut (1s) ───────────────────────────────────────────
+        self.play(
+            FadeOut(title),
+            FadeOut(resonance_pair),
+            FadeOut(hybrid),
+            FadeOut(hybrid_label),
+            FadeOut(bond_order_text),
+            FadeOut(planarity_text),
+            FadeOut(no_rotation),
+            run_time=1.0,
+        )

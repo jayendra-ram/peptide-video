@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build + render + assemble pipeline")
-    parser.add_argument("--quality", default="preview", choices=["preview", "final"])
+    parser.add_argument("--quality", default="preview", choices=["preview", "medium", "final"])
     parser.add_argument("--skip-render", action="store_true")
     parser.add_argument("--skip-tts", action="store_true")
     parser.add_argument("--tts-dry-run", action="store_true")

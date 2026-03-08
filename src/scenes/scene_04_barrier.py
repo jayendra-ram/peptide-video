@@ -1,13 +1,24 @@
 """Scene 4: free-energy barrier.
 
-Reaction coordinate curve in 3D space with animated pointer. Static molecules.
+Reaction coordinate energy diagram with animated pointer and thermodynamic equations.
 """
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any, Dict
+
+from manim import (
+    DOWN,
+    FadeIn,
+    FadeOut,
+    MathTex,
+    Text,
+    UP,
+    WHITE,
+    Write,
+    np,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -15,66 +26,77 @@ if str(ROOT) not in sys.path:
 
 SCENE_ID = "scene_04_barrier"
 
+from src.manim.scene_base import PeptideSceneBase
+from src.manim.energy_diagram import ReactionCoordinatePlot
+from src.manim.equation_helpers import gibbs_equation, arrhenius_equation
+from src.chemistry.reaction_coordinate import (
+    ReactionCoordinate,
+    ReactionCoordinatePoint,
+)
 
-def build(scene_ctx: Dict[str, Any]) -> None:
-    style = scene_ctx["style"]
-    preset = scene_ctx["preset"]
-    fps = scene_ctx.get("fps", 30)
-    duration = scene_ctx.get("duration_seconds", 20)
 
-    from src.core.blender_scene import (
-        add_energy_curve,
-        add_pointer_sphere,
-        add_text_overlay,
-        setup_camera,
-        setup_lighting,
-        setup_scene,
-    )
-    from src.chemistry.molecules import GLYCINE_A_REACTANT, draw_molecule
-    from src.chemistry.reaction_coordinate import (
-        ReactionCoordinate,
-        ReactionCoordinatePoint,
-    )
+class BarrierScene(PeptideSceneBase):
+    """12-second scene: reaction coordinate diagram with thermodynamic annotations."""
 
-    setup_scene(preset, style, fps=fps, duration_seconds=duration)
-    setup_lighting()
+    def construct(self) -> None:
+        # ── Build energy profile ──────────────────────────────────────────
+        coordinate = ReactionCoordinate(
+            points=[
+                ReactionCoordinatePoint(progress=0.0, free_energy=1.0),
+                ReactionCoordinatePoint(progress=0.2, free_energy=2.0),
+                ReactionCoordinatePoint(progress=0.4, free_energy=6.5),
+                ReactionCoordinatePoint(progress=0.5, free_energy=7.0),
+                ReactionCoordinatePoint(progress=0.6, free_energy=6.5),
+                ReactionCoordinatePoint(progress=0.8, free_energy=1.5),
+                ReactionCoordinatePoint(progress=1.0, free_energy=0.0),
+            ]
+        )
 
-    # Build energy profile
-    coordinate = ReactionCoordinate(
-        points=[
-            ReactionCoordinatePoint(progress=0.0, free_energy=1.0),
-            ReactionCoordinatePoint(progress=0.2, free_energy=2.0),
-            ReactionCoordinatePoint(progress=0.4, free_energy=6.5),
-            ReactionCoordinatePoint(progress=0.5, free_energy=7.0),
-            ReactionCoordinatePoint(progress=0.6, free_energy=6.5),
-            ReactionCoordinatePoint(progress=0.8, free_energy=1.5),
-            ReactionCoordinatePoint(progress=1.0, free_energy=0.0),
-        ]
-    )
-    samples = [
-        (coordinate.sample(p / 30).progress, coordinate.sample(p / 30).free_energy)
-        for p in range(31)
-    ]
+        plot = ReactionCoordinatePlot(
+            coordinate,
+            energy_color=self.ENERGY_COLOR,
+            x_length=8.0,
+            y_length=4.5,
+        )
+        plot.move_to(UP * 0.3)
 
-    curve_obj = add_energy_curve(
-        samples, style, x_scale=6.0, x_offset=-3.0, y_offset=0.0, z_scale=0.25
-    )
-    add_pointer_sphere(curve_obj, radius=0.1)
+        # ── Step 1: Show axes + curve (2s) ────────────────────────────────
+        self.play(FadeIn(plot), run_time=2.0)
 
-    # Labels
-    add_text_overlay("Reaction Progress →", location=(-2.5, 0, -0.8), size=0.12)
-    add_text_overlay("Free Energy ↑", location=(-3.8, 0, 0.5), size=0.10)
-    add_text_overlay("Activation\nBarrier", location=(0.0, 0, 2.2), size=0.14)
+        # ── Step 2: Animate pointer along curve (3s) ──────────────────────
+        self.play(plot.get_pointer_animation(run_time=3.0))
 
-    # Small static molecule on the left
-    draw_molecule(
-        GLYCINE_A_REACTANT, style, offset=(-5.5, 0, -1.5), label_prefix="S4_"
-    )
+        # ── Step 3: Write barrier annotation (1.5s) ───────────────────────
+        barrier_label = MathTex(
+            r"\Delta G^{\ddagger} \approx 80 \;\text{kJ/mol}",
+            font_size=26,
+            color=self.ENERGY_COLOR,
+        )
+        # Place near the top of the barrier (TS region)
+        ts_point = plot.axes.c2p(0.5, 7.0)
+        barrier_label.next_to(ts_point, UP + np.array([1.0, 0, 0]), buff=0.3)
+        self.play(Write(barrier_label), run_time=1.5)
 
-    # Molecule description
-    add_text_overlay(
-        "Gly-COOH + H2N-Gly: dG barrier ~80 kJ/mol in water",
-        location=(-4.0, 0, -1.8), size=0.09,
-    )
+        # ── Step 4: Write Gibbs equation (1.5s) ───────────────────────────
+        gibbs_eq = gibbs_equation(font_size=28, color=WHITE)
+        gibbs_eq.to_edge(DOWN, buff=1.2)
+        self.play(Write(gibbs_eq), run_time=1.5)
 
-    cam = setup_camera((0, -8, 3), (0, 0, 0.5), fov_deg=35)
+        # ── Step 5: Write Arrhenius equation (1.5s) ───────────────────────
+        arr_eq = arrhenius_equation(font_size=28, color=WHITE)
+        arr_eq.next_to(gibbs_eq, DOWN, buff=0.3)
+        self.play(Write(arr_eq), run_time=1.5)
+
+        # ── Step 6: Wait remaining ────────────────────────────────────────
+        # Total so far: 2.0 + 3.0 + 1.5 + 1.5 + 1.5 = 9.5s
+        # Need 12s total, minus 1s for fade out = 1.5s remaining
+        self.wait(1.5)
+
+        # ── Step 7: FadeOut (1s) ──────────────────────────────────────────
+        self.play(
+            FadeOut(plot),
+            FadeOut(barrier_label),
+            FadeOut(gibbs_eq),
+            FadeOut(arr_eq),
+            run_time=1.0,
+        )

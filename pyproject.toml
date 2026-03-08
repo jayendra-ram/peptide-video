@@ -1,13 +1,14 @@
 [project]
 name = "peptide_video"
 version = "0.1.0"
-description = "Pipeline scaffolding for a Python + Blender peptide bond explainer"
+description = "Pipeline scaffolding for a Manim peptide bond explainer"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "pyyaml>=6.0",
   "pydantic>=2.5",
-  "numpy>=1.26"
+  "numpy>=1.26",
+  "manim>=0.18.0"
 ]
 
 [project.optional-dependencies]
