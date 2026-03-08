@@ -1,0 +1,30 @@
+colors:
+  background: "#05060a"
+  atom_c: "#7f8c8d"
+  atom_h: "#ecf0f1"
+  atom_o: "#e74c3c"
+  atom_n: "#3498db"
+  orbital_donor: "#6c5ce7"
+  orbital_acceptor: "#f39c12"
+  charge_positive: "#f5b041"
+  charge_negative: "#5dade2"
+  energy_curve: "#f1c40f"
+fonts:
+  primary: "assets/fonts/SourceSansPro-Regular.ttf"
+  label_caps: "assets/fonts/SourceSansPro-SemiBold.ttf"
+materials:
+  atom_radius:
+    H: 0.15
+    C: 0.25
+    N: 0.23
+    O: 0.22
+  glossy_strength: 0.15
+  emission_strength: 4.0
+camera:
+  default_fov_deg: 35
+  dolly_speed: 0.2
+  orbit_speed: 0.05
+labeling:
+  halo_strength: 0.5
+  halo_color: "#ffffff"
+  drop_shadow: true

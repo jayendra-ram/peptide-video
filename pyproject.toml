@@ -1,0 +1,22 @@
+[project]
+name = "peptide_video"
+version = "0.1.0"
+description = "Pipeline scaffolding for a Python + Blender peptide bond explainer"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pyyaml>=6.0",
+  "pydantic>=2.5",
+  "numpy>=1.26"
+]
+
+[project.optional-dependencies]
+tts = [
+  "openai>=1.6"
+]
+
+[tool.peptide_video]
+source_dir = "src"
+config_dir = "config"
+assets_dir = "assets"
+output_dir = "output"

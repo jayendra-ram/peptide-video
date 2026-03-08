@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Output artifacts
+output/frames/
+output/shots/
+output/audio/*.mp3
+output/audio/audio_concat.txt
+output/*.mp4
+
+# IDE
+.vscode/
+.idea/

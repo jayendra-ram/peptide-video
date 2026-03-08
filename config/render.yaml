@@ -1,0 +1,32 @@
+render_presets:
+  eevee:
+    engine: "EEVEE"
+    samples: 16
+    denoise: false
+    motion_blur: false
+    resolution_percentage: 50
+    output_format: "PNG"
+  preview:
+    engine: "EEVEE"
+    samples: 32
+    denoise: false
+    motion_blur: false
+    resolution_percentage: 50
+    output_format: "PNG"
+  final:
+    engine: "CYCLES"
+    samples: 256
+    denoise: true
+    motion_blur: true
+    resolution_percentage: 100
+    output_format: "PNG"
+blender:
+  executable: "blender"
+  python_entry: "scripts/build.py"
+  env:
+    BLENDER_USER_SCRIPTS: "${PWD}/src"
+ffmpeg:
+  executable: "ffmpeg"
+  master_bitrate: "25M"
+  audio_bitrate: "192k"
+  frame_rate: 30

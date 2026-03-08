@@ -1,0 +1,87 @@
+1
+00:00:00,000 --> 00:00:03,635
+Everyone learns that peptide bonds hold proteins together
+
+2
+00:00:03,635 --> 00:00:05,676
+but what is the bond physically?
+
+3
+00:00:05,676 --> 00:00:09,503
+Let's zoom in from amino acids down to orbitals to find out.
+
+4
+00:00:12,000 --> 00:00:14,486
+We start with two amino acids in water.
+
+5
+00:00:14,486 --> 00:00:16,782
+The amine lone pair is electron rich
+
+6
+00:00:16,782 --> 00:00:22,968
+while the carbonyl carbon is electrophilic because its pi electrons are pulled toward the oxygen.
+
+7
+00:00:25,000 --> 00:00:31,116
+Think of the nitrogen lone pair as the HOMO donor and the carbonyl pi star as the LUMO acceptor.
+
+8
+00:00:31,116 --> 00:00:35,512
+When properly aligned, these orbitals overlap to launch the reaction.
+
+9
+00:00:38,000 --> 00:00:42,924
+Products may be favored, but there is still a substantial activation barrier.
+
+10
+00:00:42,924 --> 00:00:44,424
+Without catalysis
+
+11
+00:00:44,424 --> 00:00:48,103
+water does not allow spontaneous dehydration and bond formation.
+
+12
+00:00:50,000 --> 00:00:54,195
+The nitrogen approaches and shares density with the carbonyl carbon.
+
+13
+00:00:54,195 --> 00:00:59,192
+Bond orders redistribute as we climb the barrier into a tetrahedral intermediate.
+
+14
+00:01:02,000 --> 00:01:04,926
+Proton relays sculpt which atoms carry charge.
+
+15
+00:01:04,926 --> 00:01:09,823
+As water leaves, the new amide grows stronger and geometry begins to flatten.
+
+16
+00:01:12,000 --> 00:01:18,656
+Resonance between the carbonyl and nitrogen grants partial double-bond character and enforces planarity
+
+17
+00:01:18,656 --> 00:01:21,048
+limiting rotation along the backbone.
+
+18
+00:01:23,000 --> 00:01:27,779
+Cells invest ATP to activate amino acids and position them on the ribosome
+
+19
+00:01:27,779 --> 00:01:31,784
+allowing peptide bonds to form under physiological conditions.
+
+20
+00:01:34,000 --> 00:01:37,033
+From orbital overlap to resonance stabilization
+
+21
+00:01:37,033 --> 00:01:41,487
+a peptide bond is a physical story about electrons, energy landscapes
+
+22
+00:01:41,487 --> 00:01:43,359
+and biological orchestration.
