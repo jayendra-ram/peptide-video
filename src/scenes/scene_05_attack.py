@@ -1,14 +1,28 @@
 """Scene 5: nucleophilic attack.
 
-N2 approaches C1. Atoms animate from reactant to tetrahedral intermediate.
-Bonds skipped to avoid static-cylinder artifacts during animation.
+Reactant molecules morph toward tetrahedral intermediate with curly arrows
+showing electron flow and bond order annotations.
 """
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any, Dict
+
+from manim import (
+    DOWN,
+    FadeIn,
+    FadeOut,
+    LEFT,
+    PI,
+    ReplacementTransform,
+    RIGHT,
+    Text,
+    UP,
+    WHITE,
+    Write,
+    np,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -16,86 +30,137 @@ if str(ROOT) not in sys.path:
 
 SCENE_ID = "scene_05_attack"
 
+from src.manim.scene_base import PeptideSceneBase
+from src.manim.molecule_mobject import MoleculeMobject
+from src.manim.arrow_mobject import CurlyArrow
+from src.manim.equation_helpers import bond_order_annotation
+from src.chemistry.molecules import (
+    GLYCINE_A_REACTANT,
+    GLYCINE_B_REACTANT,
+    TETRAHEDRAL_TS,
+)
 
-def build(scene_ctx: Dict[str, Any]) -> None:
-    style = scene_ctx["style"]
-    preset = scene_ctx["preset"]
-    fps = scene_ctx.get("fps", 30)
-    duration = scene_ctx.get("duration_seconds", 12)
 
-    from src.core.blender_scene import (
-        _set_bezier_easing,
-        add_text_overlay,
-        animate_camera,
-        setup_camera,
-        setup_lighting,
-        setup_scene,
-    )
-    from src.chemistry.molecules import (
-        GLYCINE_A_REACTANT,
-        GLYCINE_B_REACTANT,
-        TETRAHEDRAL_TS,
-        draw_molecule,
-    )
+class AttackScene(PeptideSceneBase):
+    """12-second scene: nucleophilic attack with electron-flow arrows."""
 
-    setup_scene(preset, style, fps=fps, duration_seconds=duration)
-    setup_lighting()
+    def construct(self) -> None:
+        # ── Build reactant molecules ──────────────────────────────────────
+        mol_a = MoleculeMobject(
+            GLYCINE_A_REACTANT,
+            atom_colors=self.ATOM_COLORS,
+            atom_radii=self.ATOM_RADII,
+            show_labels=True,
+            show_bonds=True,
+            scale_factor=1.0,
+            offset=(-0.5, 0, 0),
+            label_font_size=18,
+        )
 
-    import bpy
+        mol_b = MoleculeMobject(
+            GLYCINE_B_REACTANT,
+            atom_colors=self.ATOM_COLORS,
+            atom_radii=self.ATOM_RADII,
+            show_labels=True,
+            show_bonds=True,
+            scale_factor=1.0,
+            offset=(0, 0, 0),
+            label_font_size=18,
+        )
 
-    total_frames = int(fps * duration)
-    mid_frame = total_frames // 2
+        # ── Step 1: FadeIn reactant molecules (1s) ────────────────────────
+        self.play(FadeIn(mol_a), FadeIn(mol_b), run_time=1.0)
 
-    # Draw reactants — skip bonds since atoms will animate
-    atoms_a = draw_molecule(
-        GLYCINE_A_REACTANT, style, offset=(-0.5, 0, 0), label_prefix="ATK_",
-        skip_bonds=True,
-    )
-    atoms_b = draw_molecule(
-        GLYCINE_B_REACTANT, style, offset=(0, 0, 0), label_prefix="ATK_",
-        skip_bonds=True,
-    )
-    all_atoms = {**atoms_a, **atoms_b}
+        # ── Step 2: Write title (0.8s) ────────────────────────────────────
+        title = Text(
+            "Nucleophilic Attack",
+            font_size=36,
+            color=WHITE,
+            weight="BOLD",
+        ).to_edge(UP, buff=0.4)
+        self.play(Write(title), run_time=0.8)
 
-    # Keyframe reactant positions at frame 1
-    for label, obj in all_atoms.items():
-        obj.keyframe_insert(data_path="location", frame=1)
+        # ── Step 3: CurlyArrow N2 -> C1 (nucleophilic attack) (1.5s) ─────
+        n2_center = mol_b.get_atom_center("N2")
+        c1_center = mol_a.get_atom_center("C1")
 
-    # Build TS position lookup
-    ts_positions = {label: pos for label, sym, pos in TETRAHEDRAL_TS.atoms}
+        arrow_nc = CurlyArrow(
+            start=n2_center,
+            end=c1_center,
+            color=self.ORBITAL_DONOR,
+            angle=PI / 3,
+            stroke_width=3,
+            tip_length=0.12,
+        )
+        self.play(FadeIn(arrow_nc), run_time=1.5)
 
-    # Keyframe TS positions at mid_frame
-    for label, obj in all_atoms.items():
-        if label in ts_positions:
-            obj.location = ts_positions[label]
-            obj.keyframe_insert(data_path="location", frame=mid_frame)
+        # ── Step 4: CurlyArrow C=O -> O (pi electrons to oxygen) (1s) ────
+        o1_center = mol_a.get_atom_center("O1")
+        # Arrow from C=O bond midpoint toward O1
+        co_midpoint = (c1_center + o1_center) / 2
+        arrow_co = CurlyArrow(
+            start=co_midpoint,
+            end=o1_center,
+            color=self.ORBITAL_ACCEPTOR,
+            angle=-PI / 4,
+            stroke_width=3,
+            tip_length=0.10,
+        )
+        self.play(FadeIn(arrow_co), run_time=1.0)
 
-    # Ease all keyframes
-    for label, obj in all_atoms.items():
-        _set_bezier_easing(obj)
+        # ── Step 5: Bond order annotations (1.5s) ────────────────────────
+        bo_cn = bond_order_annotation("C-N", r"0 \rightarrow 0.6", font_size=22, color=WHITE)
+        bo_co = bond_order_annotation("C=O", r"2.0 \rightarrow 1.0", font_size=22, color=WHITE)
 
-    # Labels
-    label_obj = add_text_overlay(
-        "Nucleophilic Attack", location=(-2.5, 0, 2.5), size=0.18
-    )
-    label_obj.scale = (0, 0, 0)
-    label_obj.keyframe_insert(data_path="scale", frame=1)
-    label_obj.scale = (1, 1, 1)
-    label_obj.keyframe_insert(data_path="scale", frame=int(fps * 0.5))
-    label_obj.keyframe_insert(data_path="scale", frame=int(fps * 4))
-    label_obj.scale = (0, 0, 0)
-    label_obj.keyframe_insert(data_path="scale", frame=int(fps * 5))
+        # Position near the forming bonds
+        cn_midpoint = (c1_center + n2_center) / 2
+        bo_cn.next_to(cn_midpoint, DOWN, buff=0.4)
+        bo_co.next_to(co_midpoint, UP + LEFT, buff=0.3)
 
-    # Molecule description
-    desc = add_text_overlay(
-        "Gly-COOH + H2N-Gly  -->  tetrahedral intermediate",
-        location=(-3.5, 0, -2.2), size=0.10,
-    )
-    desc.scale = (0, 0, 0)
-    desc.keyframe_insert(data_path="scale", frame=1)
-    desc.scale = (1, 1, 1)
-    desc.keyframe_insert(data_path="scale", frame=int(fps * 1))
+        self.play(Write(bo_cn), Write(bo_co), run_time=1.5)
 
-    # Camera: follow the approach
-    cam = setup_camera((1, -6, 2), (0.3, 0, -0.2), fov_deg=35)
-    animate_camera(cam, (1, -6, 2), (0.3, -4, 0.5), 1, total_frames)
+        # ── Step 6: Transform to tetrahedral intermediate (2s) ────────────
+        # Fade out arrows and annotations before morphing
+        self.play(
+            FadeOut(arrow_nc),
+            FadeOut(arrow_co),
+            FadeOut(bo_cn),
+            FadeOut(bo_co),
+            run_time=0.5,
+        )
+
+        ts_mol = MoleculeMobject(
+            TETRAHEDRAL_TS,
+            atom_colors=self.ATOM_COLORS,
+            atom_radii=self.ATOM_RADII,
+            show_labels=True,
+            show_bonds=True,
+            scale_factor=1.0,
+            offset=(0, 0, 0),
+            label_font_size=18,
+        )
+
+        from manim import VGroup
+        reactants = VGroup(mol_a, mol_b)
+        self.play(ReplacementTransform(reactants, ts_mol), run_time=2.0)
+
+        # ── Step 7: Write "Tetrahedral Intermediate" label (1s) ──────────
+        ts_label = Text(
+            "Tetrahedral Intermediate",
+            font_size=28,
+            color=WHITE,
+        ).to_edge(DOWN, buff=0.6)
+        self.play(Write(ts_label), run_time=1.0)
+
+        # ── Step 8: Wait remaining ───────────────────────────────────────
+        # Total so far: 1.0 + 0.8 + 1.5 + 1.0 + 1.5 + 0.5 + 2.0 + 1.0 = 9.3s
+        # Need 12s total, minus 1s for fade out = 1.7s remaining
+        self.wait(1.7)
+
+        # ── Step 9: FadeOut (1s) ──────────────────────────────────────────
+        self.play(
+            FadeOut(title),
+            FadeOut(ts_mol),
+            FadeOut(ts_label),
+            run_time=1.0,
+        )

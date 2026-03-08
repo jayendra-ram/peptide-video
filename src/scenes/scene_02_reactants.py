@@ -1,14 +1,27 @@
 """Scene 2: introduce amino acid reactants.
 
-Two amino acids separated in 3D. Charge halos on key atoms. Slow camera orbit.
+Two glycine molecules side by side with partial charges, curly arrow, and equation.
 """
 
 from __future__ import annotations
 
-import math
 import sys
 from pathlib import Path
-from typing import Any, Dict
+
+from manim import (
+    DOWN,
+    FadeIn,
+    FadeOut,
+    Create,
+    LEFT,
+    MathTex,
+    RIGHT,
+    Text,
+    UP,
+    WHITE,
+    Write,
+    np,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -16,81 +29,122 @@ if str(ROOT) not in sys.path:
 
 SCENE_ID = "scene_02_reactants"
 
+from src.manim.scene_base import PeptideSceneBase
+from src.manim.molecule_mobject import MoleculeMobject
+from src.manim.arrow_mobject import CurlyArrow
+from src.manim.equation_helpers import peptide_formation_equation
+from src.chemistry.molecules import GLYCINE_A_REACTANT, GLYCINE_B_REACTANT
 
-def build(scene_ctx: Dict[str, Any]) -> None:
-    style = scene_ctx["style"]
-    preset = scene_ctx["preset"]
-    fps = scene_ctx.get("fps", 30)
-    duration = scene_ctx.get("duration_seconds", 22)
 
-    from src.core.blender_scene import (
-        _set_bezier_easing,
-        add_charge_halo,
-        add_curved_arrow,
-        add_text_overlay,
-        setup_camera,
-        setup_lighting,
-        setup_scene,
-    )
-    from src.chemistry.molecules import (
-        GLYCINE_A_REACTANT,
-        GLYCINE_B_REACTANT,
-        draw_molecule,
-    )
+class ReactantsScene(PeptideSceneBase):
+    """13-second scene: two glycine reactants with charges, arrow, and equation."""
 
-    setup_scene(preset, style, fps=fps, duration_seconds=duration)
-    setup_lighting()
+    def construct(self) -> None:
+        # ── Draw two glycine molecules side by side ──────────────────────
+        mol_a = MoleculeMobject(
+            GLYCINE_A_REACTANT,
+            atom_colors=self.ATOM_COLORS,
+            atom_radii=self.ATOM_RADII,
+            show_labels=True,
+            scale_factor=1.0,
+            offset=(-1.0, 0, 0),
+            label_font_size=18,
+        )
 
-    import bpy
+        mol_b = MoleculeMobject(
+            GLYCINE_B_REACTANT,
+            atom_colors=self.ATOM_COLORS,
+            atom_radii=self.ATOM_RADII,
+            show_labels=True,
+            scale_factor=1.0,
+            offset=(0, 0, 0),
+            label_font_size=18,
+        )
 
-    total_frames = int(fps * duration)
+        # ── Step 1: FadeIn both molecules (1.5s) ────────────────────────
+        self.play(FadeIn(mol_a), FadeIn(mol_b), run_time=1.5)
 
-    # Draw both amino acids
-    atoms_a = draw_molecule(
-        GLYCINE_A_REACTANT, style, offset=(-1.0, 0, 0), label_prefix="A_"
-    )
-    atoms_b = draw_molecule(
-        GLYCINE_B_REACTANT, style, offset=(0, 0, 0), label_prefix="B_"
-    )
+        # ── Step 2: Write labels for amine/carbonyl (1s) ────────────────
+        # Label the amine group (nucleophile) near N2
+        n2_center = mol_b.get_atom_center("N2")
+        amine_label = Text(
+            "Amine (nucleophile)",
+            font_size=20,
+            color=self.ORBITAL_DONOR,
+            weight="BOLD",
+        ).next_to(n2_center, UP, buff=0.5)
 
-    # Partial charge halos
-    add_charge_halo(atoms_a["C1"], magnitude=0.35, style=style)
-    add_charge_halo(atoms_a["O1"], magnitude=-0.6, style=style)
-    add_charge_halo(atoms_b["N2"], magnitude=-0.4, style=style)
+        # Label the carbonyl group (electrophile) near C1
+        c1_center = mol_a.get_atom_center("C1")
+        carbonyl_label = Text(
+            "Carbonyl (electrophile)",
+            font_size=20,
+            color=self.ORBITAL_ACCEPTOR,
+            weight="BOLD",
+        ).next_to(c1_center, UP, buff=0.5)
 
-    # Curved arrow from N2 toward C1
-    n2_pos = tuple(atoms_b["N2"].location)
-    c1_pos = tuple(atoms_a["C1"].location)
-    arrow = add_curved_arrow(n2_pos, c1_pos, color=(1.0, 0.8, 0.0), arc_height=0.8)
-    # Fade arrow in
-    arrow.scale = (0, 0, 0)
-    arrow.keyframe_insert(data_path="scale", frame=int(fps * 4))
-    arrow.scale = (1, 1, 1)
-    arrow.keyframe_insert(data_path="scale", frame=int(fps * 5.5))
+        self.play(Write(amine_label), Write(carbonyl_label), run_time=1.0)
 
-    # Labels
-    add_text_overlay("Amine (nucleophile)", location=(1.5, 0, 1.2), size=0.14)
-    add_text_overlay("Carbonyl (electrophile)", location=(-2.5, 0, 1.2), size=0.14)
+        # ── Step 3: Write partial charge annotations (1.5s) ──────────────
+        # delta+ on C1 (electrophilic carbon)
+        delta_plus_c1 = MathTex(
+            r"\delta^+",
+            font_size=28,
+            color=self.CHARGE_POS,
+        ).next_to(c1_center, DOWN, buff=0.15)
 
-    # Camera: slow orbit
-    cam = setup_camera((0.5, -6, 2.5), (0.5, 0, 0), fov_deg=35)
-    for i in range(5):
-        frame = 1 + int(i * total_frames / 4)
-        angle = i * math.pi / 6
-        x = 0.5 + 6 * math.sin(angle)
-        y = -6 * math.cos(angle)
-        z = 2.5 - 0.3 * i
-        cam.location = (x, y, z)
-        cam.keyframe_insert(data_path="location", frame=frame)
+        # delta- on O1 (carbonyl oxygen)
+        o1_center = mol_a.get_atom_center("O1")
+        delta_minus_o1 = MathTex(
+            r"\delta^-",
+            font_size=28,
+            color=self.CHARGE_NEG,
+        ).next_to(o1_center, UP, buff=0.15)
 
-    _set_bezier_easing(cam)
+        # delta- on N2 (nucleophilic nitrogen)
+        delta_minus_n2 = MathTex(
+            r"\delta^-",
+            font_size=28,
+            color=self.CHARGE_NEG,
+        ).next_to(n2_center, DOWN, buff=0.15)
 
-    # Molecule description
-    desc = add_text_overlay(
-        "Glycine (C-terminus: -CH2-COOH)  +  Glycine (N-terminus: H2N-CH2-)",
-        location=(-4.0, 0, -2.2), size=0.09,
-    )
-    desc.scale = (0, 0, 0)
-    desc.keyframe_insert(data_path="scale", frame=1)
-    desc.scale = (1, 1, 1)
-    desc.keyframe_insert(data_path="scale", frame=int(fps * 1))
+        self.play(
+            Write(delta_plus_c1),
+            Write(delta_minus_o1),
+            Write(delta_minus_n2),
+            run_time=1.5,
+        )
+
+        # ── Step 4: Create CurlyArrow N2 -> C1 (1.5s) ───────────────────
+        arrow = CurlyArrow(
+            start=n2_center,
+            end=c1_center,
+            color=self.ENERGY_COLOR,
+            stroke_width=3.5,
+            tip_length=0.14,
+        )
+        self.play(Create(arrow), run_time=1.5)
+
+        # ── Step 5: Write balanced equation at bottom (1.5s) ─────────────
+        equation = peptide_formation_equation(font_size=26)
+        equation.to_edge(DOWN, buff=0.6)
+        self.play(Write(equation), run_time=1.5)
+
+        # ── Step 6: Wait remaining time ──────────────────────────────────
+        # Total so far: 1.5 + 1.0 + 1.5 + 1.5 + 1.5 = 7.0s
+        # Need 13s total, minus 1s for fade out = 5.0s remaining
+        self.wait(5.0)
+
+        # ── Step 7: FadeOut everything (1s) ──────────────────────────────
+        self.play(
+            FadeOut(mol_a),
+            FadeOut(mol_b),
+            FadeOut(amine_label),
+            FadeOut(carbonyl_label),
+            FadeOut(delta_plus_c1),
+            FadeOut(delta_minus_o1),
+            FadeOut(delta_minus_n2),
+            FadeOut(arrow),
+            FadeOut(equation),
+            run_time=1.0,
+        )
