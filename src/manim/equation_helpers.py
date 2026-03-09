@@ -1,47 +1,15 @@
-"""Helper functions returning MathTex/Tex objects for chemical equations."""
+"""Generic equation Text objects for Manim scenes (Unicode, no LaTeX)."""
 
 from __future__ import annotations
 
-from manim import MathTex, WHITE, ManimColor
-
-
-def peptide_formation_equation(
-    font_size: int = 30, color: ManimColor | str = WHITE,
-) -> MathTex:
-    """Overall condensation reaction for glycine dipeptide."""
-    return MathTex(
-        r"\text{H}_2\text{N-CH}_2\text{-COOH}",
-        r"+",
-        r"\text{H}_2\text{N-CH}_2\text{-COOH}",
-        r"\rightarrow",
-        r"\text{Gly-Gly}",
-        r"+",
-        r"\text{H}_2\text{O}",
-        font_size=font_size,
-        color=ManimColor(color),
-    )
-
-
-def condensation_short(
-    font_size: int = 28, color: ManimColor | str = WHITE,
-) -> MathTex:
-    """Short form: 2 Gly -> Gly-Gly + H2O."""
-    return MathTex(
-        r"2\;\text{Gly}",
-        r"\rightarrow",
-        r"\text{Gly-Gly}",
-        r"+",
-        r"\text{H}_2\text{O}",
-        font_size=font_size,
-        color=ManimColor(color),
-    )
+from manim import Text, WHITE, ManimColor
 
 
 def gibbs_equation(
     font_size: int = 32, color: ManimColor | str = WHITE,
-) -> MathTex:
-    return MathTex(
-        r"\Delta G = \Delta H - T\Delta S",
+) -> Text:
+    return Text(
+        "\u0394G = \u0394H \u2212 T\u0394S",
         font_size=font_size,
         color=ManimColor(color),
     )
@@ -49,9 +17,9 @@ def gibbs_equation(
 
 def arrhenius_equation(
     font_size: int = 32, color: ManimColor | str = WHITE,
-) -> MathTex:
-    return MathTex(
-        r"k = A \, e^{-\Delta G^{\ddagger}/RT}",
+) -> Text:
+    return Text(
+        "k = Ae^(\u2212\u0394G\u2021/RT)",
         font_size=font_size,
         color=ManimColor(color),
     )
@@ -59,33 +27,9 @@ def arrhenius_equation(
 
 def equilibrium_equation(
     font_size: int = 32, color: ManimColor | str = WHITE,
-) -> MathTex:
-    return MathTex(
-        r"\Delta G^{\circ} = -RT \ln K_{\text{eq}}",
-        font_size=font_size,
-        color=ManimColor(color),
-    )
-
-
-def atp_activation_equation(
-    font_size: int = 26, color: ManimColor | str = WHITE,
-) -> MathTex:
-    return MathTex(
-        r"\text{AA} + \text{ATP}",
-        r"\xrightarrow{\text{synthetase}}",
-        r"\text{aminoacyl-tRNA} + \text{AMP} + \text{PP}_i",
-        font_size=font_size,
-        color=ManimColor(color),
-    )
-
-
-def water_departure_equation(
-    font_size: int = 28, color: ManimColor | str = WHITE,
-) -> MathTex:
-    return MathTex(
-        r"\text{tetrahedral intermediate}",
-        r"\xrightarrow{-\text{H}_2\text{O}}",
-        r"\text{amide product}",
+) -> Text:
+    return Text(
+        "\u0394G\u00b0 = \u2212RT ln K\u2091\u2091",
         font_size=font_size,
         color=ManimColor(color),
     )
@@ -93,10 +37,9 @@ def water_departure_equation(
 
 def fmo_label(
     font_size: int = 26, color: ManimColor | str = WHITE,
-) -> MathTex:
-    return MathTex(
-        r"\text{Frontier MO Theory: HOMO}_{\text{donor}}"
-        r"\rightarrow \text{LUMO}_{\text{acceptor}}",
+) -> Text:
+    return Text(
+        "Frontier MO Theory: HOMO(donor) \u2192 LUMO(acceptor)",
         font_size=font_size,
         color=ManimColor(color),
     )
@@ -105,9 +48,9 @@ def fmo_label(
 def bond_order_annotation(
     label: str, order: str,
     font_size: int = 22, color: ManimColor | str = WHITE,
-) -> MathTex:
-    return MathTex(
-        rf"\text{{{label}}}: {order}",
+) -> Text:
+    return Text(
+        f"{label}: {order}",
         font_size=font_size,
         color=ManimColor(color),
     )

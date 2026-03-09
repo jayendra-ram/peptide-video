@@ -1,33 +1,37 @@
 #!/usr/bin/env python3
-"""Build preproduction assets: configs, cue sheets, subtitles."""
+"""Build preproduction assets: timeline cue sheet and subtitles."""
 
 from __future__ import annotations
 
-import json
+import argparse
 import sys
 from pathlib import Path
-
-import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.core.script_parser import parse_script  # noqa: E402
 from src.core.timeline import TimelineBuilder  # noqa: E402
 from src.io.subtitle_writer import write_srt  # noqa: E402
 
 
-def load_yaml(path: Path):
-    with path.open("r", encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Build timeline + subtitles from script.md")
+    parser.add_argument("project_dir", type=Path, help="Path to the project directory")
+    return parser.parse_args()
 
 
 def main() -> None:
-    project_config = load_yaml(ROOT / "config" / "project.yaml")
-    builder = TimelineBuilder(project_config)
+    args = parse_args()
+    project_dir = args.project_dir if args.project_dir.is_absolute() else ROOT / args.project_dir
+    script_path = project_dir / "script.md"
+
+    scenes = parse_script(script_path)
+    builder = TimelineBuilder(scenes)
     cues = builder.build()
 
-    output_dir = ROOT / project_config["project"]["output_root"]
+    output_dir = project_dir / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     timeline_path = output_dir / "timeline.json"

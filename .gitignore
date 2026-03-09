@@ -11,13 +11,26 @@ build/
 .venv/
 venv/
 
-# Output artifacts
-output/frames/
-output/shots/
-output/audio/*.mp3
-output/audio/audio_concat.txt
-output/*.mp4
+# Project output artifacts (per-project)
+**/output/shots/
+**/output/media/
+**/output/audio/*.mp3
+**/output/audio/*.wav
+**/output/audio/audio_concat.txt
+**/output/audio/padded/
+**/output/final/
+**/output/*.mp4
+
+# Legacy root output
+output/
+media/
 
 # IDE
 .vscode/
 .idea/
+
+# Secrets
+.env
+
+# Conductor
+.context/

@@ -1,28 +1,25 @@
 #!/usr/bin/env python3
-"""Batch render every storyboarded scene via Manim CLI."""
+"""Batch render every scene using the appropriate renderer backend."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
-
-import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.io.manim_runner import ManimRunner  # noqa: E402
-
-
-def load_yaml(path: Path):
-    with path.open("r", encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+from src.core.config import load_config  # noqa: E402
+from src.core.script_parser import parse_script  # noqa: E402
+from src.io.renderer import RendererRegistry  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Render all scenes with Manim")
+    parser = argparse.ArgumentParser(description="Render all scenes")
+    parser.add_argument("project_dir", type=Path, help="Path to the project directory")
     parser.add_argument(
         "--quality",
         default="preview",
@@ -33,8 +30,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    project_config = load_yaml(ROOT / "config" / "project.yaml")
-    render_config = load_yaml(ROOT / "config" / "render.yaml")
+    project_dir = args.project_dir if args.project_dir.is_absolute() else ROOT / args.project_dir
+
+    scenes = parse_script(project_dir / "script.md")
+    render_config = load_config(ROOT, project_dir, "render.yaml")
+    style_config = load_config(ROOT, project_dir, "style.yaml")
 
     quality_flag = (
         render_config.get("manim", {})
@@ -43,23 +43,28 @@ def main() -> None:
         .get("quality", "-qm")
     )
 
-    scenes = project_config["scenes"]
-    project_meta = project_config["project"]
-    output_root = ROOT / project_meta["output_root"]
-    shots_root = output_root / "shots"
+    shots_root = project_dir / "output" / "shots"
     shots_root.mkdir(parents=True, exist_ok=True)
 
-    runner = ManimRunner(ROOT)
+    # Load TTS-based durations if available (written by generate_tts.py)
+    durations_file = project_dir / "output" / "durations.json"
+    tts_durations: dict[str, float] = {}
+    if durations_file.exists():
+        with durations_file.open() as f:
+            raw = json.load(f)
+        tts_durations = {k: v["scene_seconds"] for k, v in raw.items()}
+        print(f"[render] Loaded TTS durations from {durations_file}")
+
+    registry = RendererRegistry(project_dir, ROOT, render_config, style_config)
 
     for idx, scene in enumerate(scenes, 1):
-        scene_id = scene["id"]
-        duration = scene["duration_seconds"]
+        target_dur = tts_durations.get(scene.id, scene.duration_seconds)
         print(f"\n{'='*60}")
-        print(f"[{idx}/{len(scenes)}] Rendering {scene_id} ({duration}s)")
+        print(f"[{idx}/{len(scenes)}] Rendering {scene.id} ({target_dur:.1f}s) [{scene.render.type}:{scene.render.ref}]")
         print(f"{'='*60}")
 
-        shot_path = shots_root / f"{scene_id}.mp4"
-        runner.render_scene(scene_id, shot_path, quality=quality_flag)
+        shot_path = shots_root / f"{scene.id}.mp4"
+        registry.render(scene, shot_path, quality=quality_flag, target_duration=target_dur)
 
 
 if __name__ == "__main__":

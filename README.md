@@ -1,42 +1,88 @@
-# Peptide Video Pipeline
+# Rabat — Educational Explainer Video Framework
 
-A reproducible scaffold for a Blender + Python + FFmpeg explainer on peptide bond
-formation from a quantum-mechanical perspective. The repository separates science
-content, animation logic, and post-production so that narration, visuals, and
-assembly remain modular.
+A framework for creating educational explainer videos from markdown scripts, using
+Manim, Blender, video clips, and still images as scene renderers.
+
+## How it works
+
+1. **Write a markdown script** — define scenes, narration, timing, and visuals
+2. **Run the pipeline** — the framework renders each scene, generates TTS narration, and assembles the final video
+
+```bash
+python scripts/make_video.py projects/peptide_bonds
+```
 
 ## Repository layout
 
 ```
-config/      Project, render, and style configuration YAML files
-scripts/     Command-line entry points that orchestrate the build/render pipeline
-src/         Python packages for chemistry states, scene logic, and IO helpers
-assets/      Placeholder folders for fonts, textures, narration, music, etc.
-output/      Build artifacts such as frames, audio stems, and masters
+config/              Framework default configs (render presets, style)
+scripts/             Pipeline entry points
+src/                 Framework package
+  core/              Script parser, timeline builder, config loader
+  io/                Renderer registry, Manim/FFmpeg/Blender runners
+  manim/             Reusable Manim mobjects (molecules, orbitals, energy diagrams)
+  chemistry/         Chemistry data models (atoms, bonds, molecules)
+projects/            Video projects
+  peptide_bonds/     Example project: peptide bond formation explainer
+    script.md        The video script (single source of truth)
+    scenes/          Manim scene implementations
+    data/            Project-specific data (molecules, equations)
 ```
 
-## Command surface
+## Markdown script format
+
+Each scene is defined with a heading, metadata comments, and content sections:
+
+```markdown
+## Scene 1: Title
+<!-- id: scene_01 -->
+<!-- render: manim:MySceneClass -->
+**Duration:** 12s
+
+### Narration
+The voiceover text goes here.
+
+### Visuals
+Free-form visual directions for the scene implementer.
+
+### Text Overlays
+- [0.5s-4.0s] "Label text" -- size 0.28, position (-3.0, 0, 3.5)
+
+### Camera
+- Start: (0, -12, 6) looking at (0, 0, 0), FOV 35
+```
+
+### Render types
+
+| Directive | Description |
+|---|---|
+| `manim:ClassName` | Auto-discovers the class in `project/scenes/` and renders via Manim |
+| `video:path/to/clip.mp4` | Trims a video clip to the scene duration |
+| `image:path/to/image.png` | Holds a still image for the scene duration |
+| `blender:path/to/file.blend` | Renders via Blender CLI |
+| `placeholder` | Generates a text-plate fallback (default if omitted) |
+
+## Pipeline commands
 
 ```bash
-python scripts/build.py           # validate configs, emit timeline JSON
-python scripts/render_all.py      # batch render scene image sequences via Blender
-python scripts/generate_tts.py    # prototype narration using OpenAI TTS
-python scripts/assemble_video.py  # stitch shots + audio into a final mp4
-python scripts/make_video.py      # orchestrator with preview/final quality flags
+# Full pipeline
+python scripts/make_video.py projects/peptide_bonds --quality=preview
+
+# Individual steps
+python scripts/build.py projects/peptide_bonds
+python scripts/render_all.py projects/peptide_bonds --quality=preview
+python scripts/generate_tts.py projects/peptide_bonds --dry-run
+python scripts/assemble.py projects/peptide_bonds
 ```
 
-Each script is instrumented with structured logging and placeholder pseudocode to
-show where to integrate Blender CLI invocations, FFmpeg filters, or OpenAI calls.
+## Creating a new project
 
-> **No Blender?** `scripts/render_all.py` automatically falls back to an FFmpeg-based
-> storyboard renderer that outputs text plates for every scene so the end-to-end
-> pipeline still produces a video master.
+```bash
+mkdir -p projects/my_video/{scenes,data,assets,config,output}
+```
 
-## Next steps
+Write `projects/my_video/script.md`, implement any Manim scenes in `scenes/`, then run:
 
-1. Flesh out the chemistry `ReactionState` sampling in `src/chemistry`.
-2. Translate the storyboard scenes into Blender Python scene files under
-   `src/scenes`.
-3. Lock narration timings in `scripts/build.py` and regenerate subtitles.
-4. Swap the placeholder FFmpeg renderer and silent narration with Blender + real
-   audio when those assets are ready, then re-run `python scripts/make_video.py`.
+```bash
+python scripts/make_video.py projects/my_video
+```

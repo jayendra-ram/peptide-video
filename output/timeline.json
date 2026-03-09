@@ -2,8 +2,8 @@
   {
     "scene_id": "scene_01_intro",
     "start_time": 0.0,
-    "duration": 15,
-    "voiceover": "Everyone learns that peptide bonds hold proteins together, but what is the\nbond physically? Let's zoom in from amino acids down to orbitals to find out.",
+    "duration": 12,
+    "voiceover": "Peptide bonds link amino acids into proteins \u2014 from hemoglobin in your\nblood to collagen in your skin. This one bond builds life's molecular\nmachinery. Let's see how it forms.",
     "labels": [
       {
         "text": "THE QUESTION",
@@ -15,9 +15,9 @@
   },
   {
     "scene_id": "scene_02_reactants",
-    "start_time": 15.0,
-    "duration": 22,
-    "voiceover": "We start with two amino acids in water. The amine lone pair is electron rich,\nwhile the carbonyl carbon is electrophilic because its pi electrons are pulled\ntoward the oxygen.",
+    "start_time": 12.0,
+    "duration": 13,
+    "voiceover": "Every amino acid has two reactive ends: an electron-rich amine and an\nelectron-poor carbonyl. The nitrogen's lone pair makes it a nucleophile,\nnaturally drawn toward the carbonyl carbon.",
     "labels": [
       {
         "text": "REACTANTS",
@@ -29,9 +29,9 @@
   },
   {
     "scene_id": "scene_03_orbitals",
-    "start_time": 37.0,
-    "duration": 25,
-    "voiceover": "Think of the nitrogen lone pair as the HOMO donor and the carbonyl pi star as\nthe LUMO acceptor. When properly aligned, these orbitals overlap to launch the\nreaction.",
+    "start_time": 25.0,
+    "duration": 13,
+    "voiceover": "Quantum chemistry explains this through orbital overlap. The nitrogen\nlone pair, the HOMO, donates electrons into the carbonyl's empty LUMO.\nThis frontier orbital interaction drives the reaction.",
     "labels": [
       {
         "text": "ORBITAL LOGIC",
@@ -43,9 +43,9 @@
   },
   {
     "scene_id": "scene_04_barrier",
-    "start_time": 62.0,
-    "duration": 20,
-    "voiceover": "Products may be favored, but there is still a substantial activation barrier.\nWithout catalysis, water does not allow spontaneous dehydration and bond\nformation.",
+    "start_time": 38.0,
+    "duration": 12,
+    "voiceover": "But there's a catch: an energy barrier of about eighty kilojoules per\nmole. The Gibbs and Arrhenius equations show that without a catalyst, this\nreaction is far too slow in water.",
     "labels": [
       {
         "text": "FREE-ENERGY BARRIER",
@@ -57,9 +57,9 @@
   },
   {
     "scene_id": "scene_05_attack",
-    "start_time": 82.0,
-    "duration": 28,
-    "voiceover": "The nitrogen approaches and shares density with the carbonyl carbon. Bond\norders redistribute as we climb the barrier into a tetrahedral intermediate.",
+    "start_time": 50.0,
+    "duration": 12,
+    "voiceover": "When the barrier is overcome, nitrogen attacks the carbonyl carbon,\nsharing its electrons. Pi electrons shift onto oxygen as atoms rearrange\ninto a tetrahedral intermediate.",
     "labels": [
       {
         "text": "NUCLEOPHILIC ATTACK",
@@ -71,9 +71,9 @@
   },
   {
     "scene_id": "scene_06_water_loss",
-    "start_time": 110.0,
-    "duration": 25,
-    "voiceover": "Proton relays sculpt which atoms carry charge. As water leaves, the new amide\ngrows stronger and geometry begins to flatten.",
+    "start_time": 62.0,
+    "duration": 10,
+    "voiceover": "Proton transfers then trigger water's departure. What remains is the\nnew carbon-nitrogen amide bond, and the geometry flattens into a plane.",
     "labels": [
       {
         "text": "PROTON TRANSFERS",
@@ -85,9 +85,9 @@
   },
   {
     "scene_id": "scene_07_resonance",
-    "start_time": 135.0,
-    "duration": 22,
-    "voiceover": "Resonance between the carbonyl and nitrogen grants partial double-bond\ncharacter and enforces planarity, limiting rotation along the backbone.",
+    "start_time": 72.0,
+    "duration": 11,
+    "voiceover": "The resulting peptide bond is special. Resonance gives it partial\ndouble-bond character, locking the backbone into a rigid, planar shape\nthat defines protein structure.",
     "labels": [
       {
         "text": "AMIDE RESONANCE",
@@ -99,12 +99,12 @@
   },
   {
     "scene_id": "scene_08_biology",
-    "start_time": 157.0,
-    "duration": 18,
-    "voiceover": "Cells invest ATP to activate amino acids and position them on the ribosome,\nallowing peptide bonds to form under physiological conditions.",
+    "start_time": 83.0,
+    "duration": 11,
+    "voiceover": "In cells, ribosomes use ATP to forge twenty peptide bonds per second.\nThis chemistry also enables peptide drugs like insulin, GLP-1 agonists,\nand cancer therapeutics.",
     "labels": [
       {
-        "text": "BIOLOGICAL CONTEXT",
+        "text": "BIOLOGICAL CONTEXT & APPLICATIONS",
         "start": 0.5,
         "end": 4.0,
         "anchor": "top_left"
@@ -113,9 +113,9 @@
   },
   {
     "scene_id": "scene_09_summary",
-    "start_time": 175.0,
-    "duration": 15,
-    "voiceover": "From orbital overlap to resonance stabilization, a peptide bond is a physical\nstory about electrons, energy landscapes, and biological orchestration.",
+    "start_time": 94.0,
+    "duration": 12,
+    "voiceover": "From orbital overlap to resonance stabilization, the peptide bond is\nwhere physics meets biology. Understanding it unlocks protein engineering,\ndrug design, and the foundations of life.",
     "labels": [
       {
         "text": "SUMMARY",

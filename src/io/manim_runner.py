@@ -2,46 +2,61 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
 from typing import Optional
 
 
-# Scene class lookup: scene_id -> (module_path_relative_to_project, class_name)
-SCENE_CLASS_MAP = {
-    "scene_01_intro": ("src/scenes/scene_01_intro.py", "IntroScene"),
-    "scene_02_reactants": ("src/scenes/scene_02_reactants.py", "ReactantsScene"),
-    "scene_03_orbitals": ("src/scenes/scene_03_orbitals.py", "OrbitalsScene"),
-    "scene_04_barrier": ("src/scenes/scene_04_barrier.py", "BarrierScene"),
-    "scene_05_attack": ("src/scenes/scene_05_attack.py", "AttackScene"),
-    "scene_06_water_loss": ("src/scenes/scene_06_water_loss.py", "WaterLossScene"),
-    "scene_07_resonance": ("src/scenes/scene_07_resonance.py", "ResonanceScene"),
-    "scene_08_biology": ("src/scenes/scene_08_biology.py", "BiologyScene"),
-    "scene_09_summary": ("src/scenes/scene_09_summary.py", "SummaryScene"),
-}
-
-
 class ManimRunner:
-    def __init__(self, project_root: Path):
-        self.project_root = project_root
+    def __init__(self, framework_root: Path):
+        self.framework_root = framework_root
 
     def render_scene(
         self,
-        scene_id: str,
+        scene_file: Path,
+        class_name: str,
         output_path: Path,
         quality: str = "-qm",
+        media_dir: Optional[Path] = None,
+        extra_python_paths: Optional[list[Path]] = None,
+        target_duration: Optional[float] = None,
     ) -> Optional[Path]:
-        """Render a single scene and copy the output to *output_path*.
+        """Render a single Manim scene class and copy the output to *output_path*.
+
+        Parameters
+        ----------
+        scene_file : Path
+            Absolute path to the .py file containing the Scene subclass.
+        class_name : str
+            Name of the Scene subclass to render.
+        output_path : Path
+            Where to copy the rendered .mp4.
+        quality : str
+            Manim quality flag (e.g. ``-ql``, ``-qm``, ``-qh``).
+        media_dir : Path, optional
+            Where Manim writes intermediate media files.
+        extra_python_paths : list[Path], optional
+            Additional directories to add to PYTHONPATH.
+        target_duration : float, optional
+            Target scene duration in seconds (from TTS audio length).
 
         Returns the final output path on success, None on failure.
         """
-        if scene_id not in SCENE_CLASS_MAP:
-            print(f"[manim] Unknown scene_id: {scene_id}")
-            return None
+        if media_dir is None:
+            media_dir = self.framework_root / "output" / "media"
 
-        module_file, class_name = SCENE_CLASS_MAP[scene_id]
-        media_dir = self.project_root / "output" / "media"
+        paths = [str(self.framework_root)]
+        for p in (extra_python_paths or []):
+            paths.append(str(p))
+        env = {**os.environ, "PYTHONPATH": os.pathsep.join(paths)}
+        if target_duration is not None:
+            env["SCENE_TARGET_DURATION"] = f"{target_duration:.2f}"
+        # Ensure local TeX Live is on PATH for MathTex rendering
+        texlive_bin = Path.home() / "texlive" / "2026" / "bin" / "universal-darwin"
+        if texlive_bin.is_dir():
+            env["PATH"] = f"{texlive_bin}:{env.get('PATH', '')}"
 
         command = [
             "manim",
@@ -49,14 +64,12 @@ class ManimRunner:
             quality,
             "--media_dir",
             str(media_dir),
-            str(self.project_root / module_file),
+            str(scene_file),
             class_name,
         ]
         print(f"[manim] {' '.join(command)}")
-        subprocess.run(command, check=True, cwd=str(self.project_root))
+        subprocess.run(command, check=True, cwd=str(self.framework_root), env=env)
 
-        # Locate the rendered .mp4 — Manim places it under
-        # media_dir/videos/<module_name>/<quality_dir>/<ClassName>.mp4
         rendered = self._find_rendered_file(media_dir, class_name)
         if rendered is None:
             print(f"[manim] Could not locate rendered file for {class_name}")
