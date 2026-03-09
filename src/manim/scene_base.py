@@ -1,42 +1,70 @@
-"""Base scene class for all peptide bond Manim scenes."""
+"""Base scene class for educational explainer Manim scenes."""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import ClassVar, Optional
 
 import yaml
-from manim import Scene, MovingCameraScene, config, ManimColor
+from manim import MovingCameraScene, ManimColor
 
 
-ROOT = Path(__file__).resolve().parents[2]
+def _find_style_yaml(start: Path) -> Optional[Path]:
+    """Walk up from *start* looking for config/style.yaml."""
+    current = start
+    for _ in range(10):
+        candidate = current / "config" / "style.yaml"
+        if candidate.exists():
+            return candidate
+        parent = current.parent
+        if parent == current:
+            break
+        current = parent
+    return None
 
 
-def _load_style() -> dict:
-    path = ROOT / "config" / "style.yaml"
-    with path.open("r", encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+class ExplainerSceneBase(MovingCameraScene):
+    """Shared setup for educational explainer videos.
 
+    Loads style.yaml from the nearest ``config/`` directory (searching
+    upward from the scene file) and exposes color/radius constants.
 
-class PeptideSceneBase(MovingCameraScene):
-    """Shared setup for every scene in the peptide bond video."""
+    Subclasses override ``construct()`` to define the animation.
+    """
+
+    style_path: ClassVar[Optional[Path]] = None
 
     def setup(self) -> None:
         super().setup()
-        self.style = _load_style()
-        colors = self.style["colors"]
+        path = self.style_path or _find_style_yaml(
+            Path(__file__).resolve().parent
+        )
+        if path and path.exists():
+            with path.open("r", encoding="utf-8") as fh:
+                self.style = yaml.safe_load(fh)
+        else:
+            self.style = {}
 
-        self.camera.background_color = ManimColor(colors["background"])
+        colors = self.style.get("colors", {})
+
+        self.camera.background_color = ManimColor(
+            colors.get("background", "#05060a")
+        )
 
         self.ATOM_COLORS = {
-            "C": ManimColor(colors["atom_c"]),
-            "H": ManimColor(colors["atom_h"]),
-            "O": ManimColor(colors["atom_o"]),
-            "N": ManimColor(colors["atom_n"]),
+            "C": ManimColor(colors.get("atom_c", "#7f8c8d")),
+            "H": ManimColor(colors.get("atom_h", "#ecf0f1")),
+            "O": ManimColor(colors.get("atom_o", "#e74c3c")),
+            "N": ManimColor(colors.get("atom_n", "#3498db")),
         }
         self.ATOM_RADII = {"H": 0.15, "C": 0.25, "N": 0.23, "O": 0.22}
 
-        self.ORBITAL_DONOR = ManimColor(colors["orbital_donor"])
-        self.ORBITAL_ACCEPTOR = ManimColor(colors["orbital_acceptor"])
-        self.CHARGE_POS = ManimColor(colors["charge_positive"])
-        self.CHARGE_NEG = ManimColor(colors["charge_negative"])
-        self.ENERGY_COLOR = ManimColor(colors["energy_curve"])
+        self.ORBITAL_DONOR = ManimColor(colors.get("orbital_donor", "#6c5ce7"))
+        self.ORBITAL_ACCEPTOR = ManimColor(colors.get("orbital_acceptor", "#f39c12"))
+        self.CHARGE_POS = ManimColor(colors.get("charge_positive", "#f5b041"))
+        self.CHARGE_NEG = ManimColor(colors.get("charge_negative", "#5dade2"))
+        self.ENERGY_COLOR = ManimColor(colors.get("energy_curve", "#f1c40f"))
+
+
+# Backward-compatible alias
+PeptideSceneBase = ExplainerSceneBase

@@ -1,12 +1,11 @@
 [project]
-name = "peptide_video"
+name = "rabat"
 version = "0.1.0"
-description = "Pipeline scaffolding for a Manim peptide bond explainer"
+description = "Framework for creating educational explainer videos using Manim, Blender, and multimedia assets"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "pyyaml>=6.0",
-  "pydantic>=2.5",
   "numpy>=1.26",
   "manim>=0.18.0"
 ]
@@ -16,8 +15,5 @@ tts = [
   "openai>=1.6"
 ]
 
-[tool.peptide_video]
-source_dir = "src"
-config_dir = "config"
-assets_dir = "assets"
-output_dir = "output"
+[tool.setuptools.packages.find]
+include = ["src*"]

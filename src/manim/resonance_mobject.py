@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from manim import (
     VGroup,
-    MathTex,
     Text,
     WHITE,
     LEFT,
@@ -55,7 +54,7 @@ class ResonancePair(VGroup):
         self.add(self.mol_b)
 
         # Double-headed resonance arrow
-        self.arrow = MathTex(r"\longleftrightarrow", font_size=36, color=WHITE)
+        self.arrow = Text("\u27f7", font_size=36, color=WHITE)
         self.arrow.move_to((self.mol_a.get_right() + self.mol_b.get_left()) / 2)
         self.add(self.arrow)
 
@@ -80,6 +79,6 @@ class ResonancePair(VGroup):
         for atom_label, charge_str in charges.items():
             if atom_label in mol.atom_mobjects:
                 atom = mol.atom_mobjects[atom_label]
-                charge_tex = MathTex(charge_str, font_size=18, color=WHITE)
+                charge_tex = Text(charge_str, font_size=18, color=WHITE)
                 charge_tex.next_to(atom, RIGHT + np.array([0, 0.15, 0]), buff=0.05)
                 mol.add(charge_tex)

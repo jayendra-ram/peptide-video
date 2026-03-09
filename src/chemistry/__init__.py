@@ -1,1 +1,1 @@
-"""Chemistry domain models for the peptide bond narrative."""
+"""Chemistry domain models -- molecular geometry, atoms, bonds, orbitals."""
