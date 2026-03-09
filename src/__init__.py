@@ -1,1 +1,1 @@
-"""Peptide video pipeline source package."""
+"""Rabat — educational explainer video framework."""

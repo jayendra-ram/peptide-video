@@ -12,7 +12,6 @@ from manim import (
     Arrow,
     Dot,
     Text,
-    MathTex,
     WHITE,
     GREY,
     UP,
@@ -127,6 +126,6 @@ class EnergyLevelDiagram(VGroup):
             )
             self.add(arrow)
 
-            delta_label = MathTex(r"\Delta E", font_size=24, color=WHITE)
+            delta_label = Text("\u0394E", font_size=24, color=WHITE)
             delta_label.next_to(arrow, LEFT, buff=0.1)
             self.add(delta_label)

@@ -10,7 +10,6 @@ from manim import (
     Dot,
     DashedLine,
     DoubleArrow,
-    MathTex,
     Text,
     WHITE,
     GREY,
@@ -43,8 +42,8 @@ class ReactionCoordinatePlot(VGroup):
         energy_color: ManimColor | str = "#f1c40f",
         x_length: float = 8.0,
         y_length: float = 4.5,
-        x_label: str = r"\text{Reaction Coordinate}",
-        y_label: str = r"\Delta G \;\text{(kJ/mol)}",
+        x_label: str = "Reaction Coordinate",
+        y_label: str = "\u0394G (kJ/mol)",
     ) -> None:
         super().__init__()
         self.coordinate = coordinate
@@ -66,11 +65,11 @@ class ReactionCoordinatePlot(VGroup):
         self.add(self.axes)
 
         # Axis labels
-        x_lab = MathTex(x_label, font_size=28, color=WHITE)
+        x_lab = Text(x_label, font_size=28, color=WHITE)
         x_lab.next_to(self.axes.x_axis, DOWN, buff=0.3)
         self.add(x_lab)
 
-        y_lab = MathTex(y_label, font_size=28, color=WHITE)
+        y_lab = Text(y_label, font_size=28, color=WHITE)
         y_lab.next_to(self.axes.y_axis, LEFT, buff=0.3)
         y_lab.rotate(np.pi / 2)
         self.add(y_lab)
@@ -115,8 +114,8 @@ class ReactionCoordinatePlot(VGroup):
         )
         self.add(dg_dagger_arrow)
 
-        dg_dagger_label = MathTex(
-            r"\Delta G^{\ddagger}", font_size=24, color=YELLOW,
+        dg_dagger_label = Text(
+            "\u0394G\u2021", font_size=24, color=YELLOW,
         )
         dg_dagger_label.next_to(dg_dagger_arrow, LEFT, buff=0.1)
         self.add(dg_dagger_label)
@@ -130,8 +129,8 @@ class ReactionCoordinatePlot(VGroup):
         )
         self.add(dg_naught_arrow)
 
-        dg_naught_label = MathTex(
-            r"\Delta G^{\circ}", font_size=24, color=WHITE,
+        dg_naught_label = Text(
+            "\u0394G\u00b0", font_size=24, color=WHITE,
         )
         dg_naught_label.next_to(dg_naught_arrow, RIGHT, buff=0.1)
         self.add(dg_naught_label)

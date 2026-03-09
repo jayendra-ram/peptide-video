@@ -1,87 +1,119 @@
 1
-00:00:00,000 --> 00:00:03,635
-Everyone learns that peptide bonds hold proteins together
+00:00:00,000 --> 00:00:06,494
+Peptide bonds link amino acids into proteins — from hemoglobin in your blood to collagen in your skin.
 
 2
-00:00:03,635 --> 00:00:05,676
-but what is the bond physically?
+00:00:06,494 --> 00:00:09,551
+This one bond builds life's molecular machinery.
 
 3
-00:00:05,676 --> 00:00:09,503
-Let's zoom in from amino acids down to orbitals to find out.
+00:00:09,551 --> 00:00:11,016
+Let's see how it forms.
 
 4
-00:00:12,000 --> 00:00:14,486
-We start with two amino acids in water.
+00:00:12,000 --> 00:00:17,927
+Every amino acid has two reactive ends: an electron-rich amine and an electron-poor carbonyl.
 
 5
-00:00:14,486 --> 00:00:16,782
-The amine lone pair is electron rich
+00:00:17,927 --> 00:00:20,923
+The nitrogen's lone pair makes it a nucleophile
 
 6
-00:00:16,782 --> 00:00:22,968
-while the carbonyl carbon is electrophilic because its pi electrons are pulled toward the oxygen.
+00:00:20,923 --> 00:00:23,664
+naturally drawn toward the carbonyl carbon.
 
 7
-00:00:25,000 --> 00:00:31,116
-Think of the nitrogen lone pair as the HOMO donor and the carbonyl pi star as the LUMO acceptor.
+00:00:25,000 --> 00:00:28,588
+Quantum chemistry explains this through orbital overlap.
 
 8
-00:00:31,116 --> 00:00:35,512
-When properly aligned, these orbitals overlap to launch the reaction.
+00:00:28,588 --> 00:00:30,639
+The nitrogen lone pair, the HOMO
 
 9
-00:00:38,000 --> 00:00:42,924
-Products may be favored, but there is still a substantial activation barrier.
+00:00:30,639 --> 00:00:33,779
+donates electrons into the carbonyl's empty LUMO.
 
 10
-00:00:42,924 --> 00:00:44,424
-Without catalysis
+00:00:33,779 --> 00:00:37,240
+This frontier orbital interaction drives the reaction.
 
 11
-00:00:44,424 --> 00:00:48,103
-water does not allow spontaneous dehydration and bond formation.
+00:00:38,000 --> 00:00:42,806
+But there's a catch: an energy barrier of about eighty kilojoules per mole.
 
 12
-00:00:50,000 --> 00:00:54,195
-The nitrogen approaches and shares density with the carbonyl carbon.
+00:00:42,806 --> 00:00:46,780
+The Gibbs and Arrhenius equations show that without a catalyst
 
 13
-00:00:54,195 --> 00:00:59,192
-Bond orders redistribute as we climb the barrier into a tetrahedral intermediate.
+00:00:46,780 --> 00:00:49,280
+this reaction is far too slow in water.
 
 14
-00:01:02,000 --> 00:01:04,926
-Proton relays sculpt which atoms carry charge.
+00:00:50,000 --> 00:00:54,230
+When the barrier is overcome, nitrogen attacks the carbonyl carbon
 
 15
-00:01:04,926 --> 00:01:09,823
-As water leaves, the new amide grows stronger and geometry begins to flatten.
+00:00:54,230 --> 00:00:55,730
+sharing its electrons.
 
 16
-00:01:12,000 --> 00:01:18,656
-Resonance between the carbonyl and nitrogen grants partial double-bond character and enforces planarity
+00:00:55,730 --> 00:01:00,896
+Pi electrons shift onto oxygen as atoms rearrange into a tetrahedral intermediate.
 
 17
-00:01:18,656 --> 00:01:21,048
-limiting rotation along the backbone.
+00:01:02,000 --> 00:01:05,094
+Proton transfers then trigger water's departure.
 
 18
-00:01:23,000 --> 00:01:27,779
-Cells invest ATP to activate amino acids and position them on the ribosome
+00:01:05,094 --> 00:01:08,317
+What remains is the new carbon-nitrogen amide bond
 
 19
-00:01:27,779 --> 00:01:31,784
-allowing peptide bonds to form under physiological conditions.
+00:01:08,317 --> 00:01:10,831
+and the geometry flattens into a plane.
 
 20
-00:01:34,000 --> 00:01:37,033
-From orbital overlap to resonance stabilization
+00:01:12,000 --> 00:01:14,461
+The resulting peptide bond is special.
 
 21
-00:01:37,033 --> 00:01:41,487
-a peptide bond is a physical story about electrons, energy landscapes
+00:01:14,461 --> 00:01:17,571
+Resonance gives it partial double-bond character
 
 22
-00:01:41,487 --> 00:01:43,359
-and biological orchestration.
+00:01:17,571 --> 00:01:19,709
+locking the backbone into a rigid
+
+23
+00:01:19,709 --> 00:01:22,560
+planar shape that defines protein structure.
+
+24
+00:01:23,000 --> 00:01:27,460
+In cells, ribosomes use ATP to forge twenty peptide bonds per second.
+
+25
+00:01:27,460 --> 00:01:31,984
+This chemistry also enables peptide drugs like insulin, GLP-1 agonists
+
+26
+00:01:31,984 --> 00:01:33,536
+and cancer therapeutics.
+
+27
+00:01:34,000 --> 00:01:37,026
+From orbital overlap to resonance stabilization
+
+28
+00:01:37,026 --> 00:01:40,117
+the peptide bond is where physics meets biology.
+
+29
+00:01:40,117 --> 00:01:43,788
+Understanding it unlocks protein engineering, drug design
+
+30
+00:01:43,788 --> 00:01:45,591
+and the foundations of life.
