@@ -40,10 +40,11 @@ class RendererRegistry:
         scene: ParsedScene,
         output_path: Path,
         quality: str = "-qm",
+        target_duration: Optional[float] = None,
     ) -> Optional[Path]:
         render_type = scene.render.type
         if render_type == "manim":
-            return self._render_manim(scene, output_path, quality)
+            return self._render_manim(scene, output_path, quality, target_duration=target_duration)
         elif render_type == "video":
             return self._render_video_clip(scene, output_path)
         elif render_type == "image":
@@ -59,7 +60,8 @@ class RendererRegistry:
     # -- Manim ----------------------------------------------------------------
 
     def _render_manim(
-        self, scene: ParsedScene, output_path: Path, quality: str
+        self, scene: ParsedScene, output_path: Path, quality: str,
+        target_duration: Optional[float] = None,
     ) -> Optional[Path]:
         class_name = scene.render.ref
         scene_file = self._discover_manim_scene(class_name)
@@ -75,6 +77,7 @@ class RendererRegistry:
             quality=quality,
             media_dir=media_dir,
             extra_python_paths=[self.project_dir],
+            target_duration=target_duration,
         )
 
     def _discover_manim_scene(self, class_name: str) -> Optional[Path]:
@@ -147,20 +150,14 @@ class RendererRegistry:
     def _render_blender(
         self, scene: ParsedScene, output_path: Path
     ) -> Optional[Path]:
-        script_path = self.project_dir / scene.render.ref
-        if not script_path.exists():
-            print(f"[renderer] Blender script not found: {script_path}, using placeholder")
+        blend_path = self.project_dir / scene.render.ref
+        if not blend_path.exists():
+            print(f"[renderer] Blender file not found: {blend_path}, using placeholder")
             return self._render_placeholder(scene, output_path)
 
         from src.io.blender_runner import BlenderRunner
         runner = BlenderRunner()
-        fps = self.render_config.get("ffmpeg", {}).get("frame_rate", 30)
-        return runner.render_script(
-            script_path=script_path,
-            output_path=output_path,
-            duration=scene.duration_seconds,
-            fps=fps,
-        )
+        return runner.render(str(blend_path), str(output_path))
 
     # -- Placeholder ----------------------------------------------------------
 

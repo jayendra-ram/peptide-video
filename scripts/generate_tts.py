@@ -8,7 +8,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(ROOT / ".env")
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -96,6 +99,13 @@ def concatenate_audio(audio_paths: list[Path], output_path: Path) -> None:
     subprocess.run(command, check=True)
 
 
+def determine_scene_duration(
+    tts_duration: float, script_duration: float, tail_pad: float = 1.5,
+) -> float:
+    """Scene duration = max(script minimum, tts speech + tail padding)."""
+    return max(script_duration, tts_duration + tail_pad)
+
+
 def make_padded_scene_audio(
     audio_path: Path, target_duration: float, output_path: Path
 ) -> None:
@@ -112,11 +122,11 @@ def make_padded_scene_audio(
     actual = float(probe.stdout.strip())
 
     if actual >= target_duration:
+        # Audio is already long enough — just convert format, no trimming
         subprocess.run(
             [
                 "ffmpeg", "-y",
                 "-i", str(audio_path),
-                "-t", f"{target_duration:.2f}",
                 "-ac", "1", "-ar", "48000",
                 str(output_path),
             ],
@@ -142,19 +152,29 @@ def assemble_narration(
     audio_dir: Path,
     scenes,
     output_path: Path,
-) -> None:
-    """Pad each scene's audio to match scene duration, then concatenate."""
+    speech_durations: dict[str, float] | None = None,
+) -> dict[str, dict]:
+    """Pad each scene's audio using audio-first durations, then concatenate.
+
+    Returns a duration map: {scene_id: {"tts_seconds": ..., "scene_seconds": ...}}
+    """
     padded_dir = audio_dir / "padded"
     padded_dir.mkdir(parents=True, exist_ok=True)
 
     duration_map = {s.id: s.duration_seconds for s in scenes}
+    speech_durations = speech_durations or {}
     padded_paths: list[Path] = []
+    result_durations: dict[str, dict] = {}
 
     for cue in cues:
         scene_id = cue["scene_id"]
         src = audio_dir / f"{scene_id}.mp3"
         dst = padded_dir / f"{scene_id}.wav"
-        target = duration_map.get(scene_id, 30)
+        script_dur = duration_map.get(scene_id, 30)
+        tts_dur = speech_durations.get(scene_id, 0.0)
+
+        # Audio-first: use TTS duration to set scene length
+        target = determine_scene_duration(tts_dur, script_dur)
 
         if not src.exists():
             print(f"[warn] No audio for {scene_id}, generating silence")
@@ -172,13 +192,20 @@ def assemble_narration(
             make_padded_scene_audio(src, target, dst)
 
         padded_paths.append(dst)
-        print(f"[pad] {scene_id}: {target:.0f}s -> {dst.name}")
+        result_durations[scene_id] = {
+            "tts_seconds": round(tts_dur, 2),
+            "scene_seconds": round(target, 2),
+        }
+        print(f"[pad] {scene_id}: tts={tts_dur:.1f}s -> scene={target:.1f}s -> {dst.name}")
 
     concatenate_audio(padded_paths, output_path)
     print(f"[done] Full narration: {output_path}")
+    return result_durations
 
 
 def main() -> None:
+    import json
+
     args = parse_args()
     project_dir = args.project_dir if args.project_dir.is_absolute() else ROOT / args.project_dir
 
@@ -218,7 +245,17 @@ def main() -> None:
     write_srt(scene_cues, srt_path, speech_durations=speech_durations)
     print(f"[subs] Synced subtitles written to {srt_path}")
 
-    assemble_narration(cues, out_dir, scenes, out_dir / "narration.wav")
+    # Assemble narration with audio-first durations
+    result_durations = assemble_narration(
+        cues, out_dir, scenes, out_dir / "narration.wav",
+        speech_durations=speech_durations,
+    )
+
+    # Write durations.json for the render step
+    durations_path = project_dir / "output" / "durations.json"
+    with durations_path.open("w") as f:
+        json.dump(result_durations, f, indent=2)
+    print(f"[durations] Written to {durations_path}")
 
 
 if __name__ == "__main__":

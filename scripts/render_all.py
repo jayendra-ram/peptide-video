@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -45,15 +46,25 @@ def main() -> None:
     shots_root = project_dir / "output" / "shots"
     shots_root.mkdir(parents=True, exist_ok=True)
 
+    # Load TTS-based durations if available (written by generate_tts.py)
+    durations_file = project_dir / "output" / "durations.json"
+    tts_durations: dict[str, float] = {}
+    if durations_file.exists():
+        with durations_file.open() as f:
+            raw = json.load(f)
+        tts_durations = {k: v["scene_seconds"] for k, v in raw.items()}
+        print(f"[render] Loaded TTS durations from {durations_file}")
+
     registry = RendererRegistry(project_dir, ROOT, render_config, style_config)
 
     for idx, scene in enumerate(scenes, 1):
+        target_dur = tts_durations.get(scene.id, scene.duration_seconds)
         print(f"\n{'='*60}")
-        print(f"[{idx}/{len(scenes)}] Rendering {scene.id} ({scene.duration_seconds}s) [{scene.render.type}:{scene.render.ref}]")
+        print(f"[{idx}/{len(scenes)}] Rendering {scene.id} ({target_dur:.1f}s) [{scene.render.type}:{scene.render.ref}]")
         print(f"{'='*60}")
 
         shot_path = shots_root / f"{scene.id}.mp4"
-        registry.render(scene, shot_path, quality=quality_flag)
+        registry.render(scene, shot_path, quality=quality_flag, target_duration=target_dur)
 
 
 if __name__ == "__main__":

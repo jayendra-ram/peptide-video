@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import ClassVar, Optional
 
@@ -36,6 +37,11 @@ class ExplainerSceneBase(MovingCameraScene):
 
     def setup(self) -> None:
         super().setup()
+
+        # Target duration from environment (set by render pipeline)
+        env_dur = os.environ.get("SCENE_TARGET_DURATION")
+        self._target_duration = float(env_dur) if env_dur else None
+
         path = self.style_path or _find_style_yaml(
             Path(__file__).resolve().parent
         )
@@ -64,6 +70,19 @@ class ExplainerSceneBase(MovingCameraScene):
         self.CHARGE_POS = ManimColor(colors.get("charge_positive", "#f5b041"))
         self.CHARGE_NEG = ManimColor(colors.get("charge_negative", "#5dade2"))
         self.ENERGY_COLOR = ManimColor(colors.get("energy_curve", "#f1c40f"))
+
+    def pad_to_duration(self) -> None:
+        """Add a wait at the end so the rendered video reaches _target_duration.
+
+        Call this as the last line of ``construct()`` to ensure the Manim
+        output video is long enough to match the TTS narration.
+        """
+        if self._target_duration is None:
+            return
+        elapsed = self.renderer.time
+        remaining = self._target_duration - elapsed
+        if remaining > 0.1:
+            self.wait(remaining)
 
 
 # Backward-compatible alias

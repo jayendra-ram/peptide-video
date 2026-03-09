@@ -21,6 +21,7 @@ class ManimRunner:
         quality: str = "-qm",
         media_dir: Optional[Path] = None,
         extra_python_paths: Optional[list[Path]] = None,
+        target_duration: Optional[float] = None,
     ) -> Optional[Path]:
         """Render a single Manim scene class and copy the output to *output_path*.
 
@@ -38,6 +39,8 @@ class ManimRunner:
             Where Manim writes intermediate media files.
         extra_python_paths : list[Path], optional
             Additional directories to add to PYTHONPATH.
+        target_duration : float, optional
+            Target scene duration in seconds (from TTS audio length).
 
         Returns the final output path on success, None on failure.
         """
@@ -48,6 +51,12 @@ class ManimRunner:
         for p in (extra_python_paths or []):
             paths.append(str(p))
         env = {**os.environ, "PYTHONPATH": os.pathsep.join(paths)}
+        if target_duration is not None:
+            env["SCENE_TARGET_DURATION"] = f"{target_duration:.2f}"
+        # Ensure local TeX Live is on PATH for MathTex rendering
+        texlive_bin = Path.home() / "texlive" / "2026" / "bin" / "universal-darwin"
+        if texlive_bin.is_dir():
+            env["PATH"] = f"{texlive_bin}:{env.get('PATH', '')}"
 
         command = [
             "manim",
