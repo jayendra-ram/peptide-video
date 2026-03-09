@@ -109,7 +109,7 @@ def determine_scene_duration(
 def make_padded_scene_audio(
     audio_path: Path, target_duration: float, output_path: Path
 ) -> None:
-    """Pad a scene's audio to exactly target_duration seconds (never trims)."""
+    """Pad or trim a scene's audio to exactly target_duration seconds."""
     probe = subprocess.run(
         [
             "ffprobe", "-v", "quiet",

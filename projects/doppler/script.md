@@ -231,8 +231,39 @@ Distant galaxies are redshifted because space itself is expanding. Astronomers u
 
 ---
 
-## Scene 9: Summary
-<!-- id: scene_09_summary -->
+## Scene 9: Rocket & Starlight
+<!-- id: scene_09_rocket -->
+<!-- render: blender:blender/rocket_star.py -->
+
+**Duration:** 14s
+
+### Narration
+
+Imagine riding a rocket toward a distant star. As you accelerate, the star's warm yellow light shifts blue — its wavelengths compressed by your motion. Reverse course, and the same starlight stretches red. This is the relativistic Doppler effect, visible across the cosmos.
+
+### Visuals
+
+- 3D scene rendered in Blender (EEVEE)
+- Cute pastel rocket ship with rounded body, red nose cone, portholes, and engine glow
+- Glowing star that shifts from yellow to blue as the rocket approaches
+- Star shifts from yellow to red as the rocket recedes
+- Background star field
+- "BLUESHIFT" and "REDSHIFT" labels appear during the respective phases
+
+### Text Overlays
+
+- [0.5s–3.5s] "Rocket & Starlight" — size 0.40, position (0, 4.0)
+- [35%–55%] "BLUESHIFT" — size 0.36, position (2, 2.5)
+- [70%–92%] "REDSHIFT" — size 0.36, position (0, 2.5)
+
+### Camera
+
+- Static: (0, -12, 2) looking at (3, 0, 0), FOV 35
+
+---
+
+## Scene 10: Summary
+<!-- id: scene_10_summary -->
 <!-- render: manim:SummaryScene -->
 
 **Duration:** 10s
